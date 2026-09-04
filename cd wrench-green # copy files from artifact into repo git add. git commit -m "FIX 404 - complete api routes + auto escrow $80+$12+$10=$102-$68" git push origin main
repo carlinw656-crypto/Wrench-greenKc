@@ -1,0 +1,77 @@
+cd wrench-green
+
+# Create Become tab
+mkdir -p components
+cat > components/BecomeMechanicTab.tsx << 'EOF'
+'use client'
+import { useState, useEffect } from 'react'
+export default function BecomeMechanicTab() {
+  const [radius, setRadius] = useState(25)
+  const [isOnline, setIsOnline] = useState(false)
+  const [form, setForm] = useState({ name:'', phone:'', areaCode:'816', state:'MO' })
+
+  useEffect(() => {
+    if (!isOnline) return
+    const id = navigator.geolocation.watchPosition(async pos => {
+      await fetch('/api/jobs/update-location', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          jobId: 'demo',
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude
+        })
+      })
+    }, null, { enableHighAccuracy:true })
+    return () => navigator.geolocation.clearWatch(id)
+  }, [isOnline])
+
+  return (
+    <div className="bg-[#18181B] rounded-2xl p-5 border border-zinc-800 space-y-4">
+      <h2 className="font-black text-xl">Become a Mechanic • Keep 85%</h2>
+
+      <input placeholder="Name" className="w-full h-12 bg-black border border-zinc-800 rounded-xl px-4"
+        value={form.name} onChange={e=>setForm({...form,name:e.target.value})} />
+      <input placeholder="Phone" className="w-full h-12 bg-black border border-zinc-800 rounded-xl px-4"
+        value={form.phone} onChange={e=>setForm({...form,phone:e.target.value})} />
+
+      <div className="grid grid-cols-2 gap-3">
+        <input placeholder="Area 816" className="h-12 bg-black border border-zinc-800 rounded-xl px-4"
+          value={form.areaCode} onChange={e=>setForm({...form,areaCode:e.target.value})} />
+        <select className="h-12 bg-black border border-zinc-800 rounded-xl px-4"
+          value={form.state} onChange={e=>setForm({...form,state:e.target.value})}>
+          <option>MO</option><option>KS</option><option>CA</option><option>TX</option>
+        </select>
+      </div>
+
+      <div>
+        <div className="flex justify-between text-sm mb-2"><span>Radius</span><span>{radius} mi</span></div>
+        <input type="range" min={5} max={50} value={radius} onChange={e=>setRadius(Number(e.target.value))}
+          className="w-full accent-[#FF6B2B]" />
+      </div>
+
+      <button className="w-full h-12 bg-[#635BFF] rounded-full font-bold"
+        onClick={()=>alert('Stripe Connect onboarding #635BFF')}>
+        Connect Payouts • Stripe
+      </button>
+
+      <div className="flex items-center justify-between bg-black p-3 rounded-xl">
+        <span className="text-sm">Go Online • GPS every 5s</span>
+        <button onClick={()=>setIsOnline(!isOnline)}
+          className={`w-12 h-7 rounded-full ${isOnline?'bg-[#22C55E]':'bg-zinc-700'}`}>
+          <div className={`w-5 h-5 bg-white rounded-full transition ${isOnline?'translate-x-6':'translate-x-1'}`} />
+        </button>
+      </div>
+
+      <button className="w-full h-14 bg-[#FF6B2B] text-black rounded-full font-black"
+        onClick={()=>alert(`Application: ${form.areaCode} • ${form.state} • ${radius}mi • Keep 85%`)}>
+        Submit Application
+      </button>
+    </div>
+  )
+}
+EOF
+
+git add.
+git commit -m "Attach Become Mechanic tab to FINAL $80+$12+$10=$102-$68 + Mapbox"
+git push origin main
